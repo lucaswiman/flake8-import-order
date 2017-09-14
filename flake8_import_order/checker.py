@@ -1,6 +1,11 @@
 import ast
 
-import pycodestyle
+try:  # pragma: no cover
+    # Flake8 2
+    from flake8.engine import pep8
+except ImportError:  # pragma: no cover
+    # Flake8 3
+    import pycodestyle as pep8
 
 from flake8_import_order import ImportVisitor
 from flake8_import_order.styles import lookup_entry_point
@@ -20,9 +25,9 @@ class ImportOrderChecker(object):
     def load_file(self):
         if self.filename in ("stdin", "-", None):
             self.filename = "stdin"
-            self.lines = pycodestyle.stdin_get_value().splitlines(True)
+            self.lines = pep8.stdin_get_value().splitlines(True)
         else:
-            self.lines = pycodestyle.readlines(self.filename)
+            self.lines = pep8.readlines(self.filename)
 
         if not self.tree:
             self.tree = ast.parse("".join(self.lines))
@@ -55,7 +60,7 @@ class ImportOrderChecker(object):
 
         imports = []
         for import_ in visitor.imports:
-            if not pycodestyle.noqa(self.lines[import_.lineno - 1]):
+            if not pep8.noqa(self.lines[import_.lineno - 1]):
                 imports.append(import_)
 
         style_cls = style_entry_point.load()
